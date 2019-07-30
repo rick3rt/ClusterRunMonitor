@@ -1,5 +1,4 @@
 # A Python script that can be used to monitor cluster jobs.
-# Not pretty, but does the job.
 # Rick Waasdorp, 10-Jul-2019
 
 import argparse
@@ -8,9 +7,6 @@ import subprocess
 import os
 from datetime import datetime, timedelta
 import copy
-
-# TODOS:
-# add the real jobnumber.
 
 
 class ClusterRunMonitor:
@@ -122,21 +118,22 @@ class ClusterRunMonitor:
             # remove empty lists
             out = [x for x in out if x]
             # split contents of list
-            out2 = [x.split('|') for x in out]
+            jobInfo = [x.split('|') for x in out]
+
             # convert start and end to datetime
             jobNames = []
-            for i in range(len(out2)):
+            for i in range(len(jobInfo)):
                 # 0JobName,1elapsed,2state,3start,4end
-                jobNames.append(out2[i][0])
+                jobNames.append(jobInfo[i][0])
                 for k in [4, 5]:
-                    if 'Unknown' not in out2[i][k]:
+                    if 'Unknown' not in jobInfo[i][k]:
                         # convert to datetime
-                        dt = datetime.strptime(out2[i][k], '%Y-%m-%dT%H:%M:%S')
+                        dt = datetime.strptime(jobInfo[i][k], '%Y-%m-%dT%H:%M:%S')
                         # make nive printable string
-                        out2[i][k] = dt.strftime('%m-%d %H:%M')
+                        jobInfo[i][k] = dt.strftime('%m-%d %H:%M')
 
             # return stuff
-            return jobNames, out2
+            return jobNames, jobInfo
         elif err:
             print(err)
         else:
@@ -159,9 +156,9 @@ class ClusterRunMonitor:
     def printInfo(self, jobInfo, numJobs=10, numbered=True):
         # print in pretty format
         if numbered:
-            header = ['JobNum', 'JobName', 'Duration', 'State', 'Start', 'End', 'JobID']
+            header = ['JobNum', 'JobID', 'JobName', 'Duration', 'State', 'Start', 'End']
         else:
-            header = ['JobName', 'Duration', 'State', 'Start', 'End', 'JobID']
+            header = ['JobID', 'JobName', 'Duration', 'State', 'Start', 'End']
 
         # select last 10 jobs or max
         numJobs = min(len(jobInfo), numJobs)
@@ -206,10 +203,14 @@ class ClusterRunMonitor:
     def listJobs(self):
         # get job info
         _, info = self.getJobInfo(self.args.numdays)
-        # number them
-        info = self.numberJobs(info)
-        # print them
-        self.printInfo(info, numJobs=self.args.num)
+        # check if there are jobs
+        if info:
+            # number them
+            info = self.numberJobs(info)
+            # print them
+            self.printInfo(info, numJobs=self.args.num)
+        else:
+            print('No Jobs found (for given number of days, try option: -D numdays)')
 
     def showJob(self):
         # get job info
@@ -223,7 +224,7 @@ class ClusterRunMonitor:
                 jobinfo = job
 
         # what to do with the job
-        jobName = jobinfo[1]
+        jobName = jobinfo[2]
         self.printInfo([jobinfo])
         # cat ouput file
         if self.args.output or self.args.error:
