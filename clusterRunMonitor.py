@@ -3,14 +3,20 @@
 # Rick Waasdorp, 10-Jul-2019
 
 import argparse
+import ConfigParser
 import subprocess
 import os
 from datetime import datetime, timedelta
 import copy
 
+# TODOS:
+# add the real jobnumber.
+
 
 class ClusterRunMonitor:
     def __init__(self):
+        # load user settings
+        self.load_settings()
         # parse input arguments
         self.input_arg_parser()
 
@@ -38,13 +44,53 @@ class ClusterRunMonitor:
         parser.add_argument('-o', '--output', help='Show output log for a job', action="store_true")
         parser.add_argument('-e', '--error', help='Show error log for a job', action="store_true")
         parser.add_argument('-N', '--num', help='Set number of jobs to list',
-                            type=int, default=10, metavar='n')
+                            type=int, default=self.num_jobs_to_list, metavar='n')
         parser.add_argument('-D', '--numdays', help='Set number of days to include in job history',
-                            type=int, default=2, metavar='d')
+                            type=int, default=self.num_days_history, metavar='d')
         parser.add_argument(
             '-c', '--cat', help='cat or tail? Default: cat, add argument to tail', action="store_true")
 
         self.args = parser.parse_args()
+
+    def load_settings(self):
+        # config file name
+        configFileName = 'crm_config.ini'
+        filePath = os.path.dirname(os.path.realpath(__file__))
+        configFilePath = os.path.join(filePath, configFileName)
+        # check if exists
+        if os.path.isfile(configFilePath):
+            self.load_config_file(configFilePath)
+        else:
+            print('creating new config file')
+            self.create_config_file(configFilePath)
+            print('load just created config file')
+            self.load_config_file(configFilePath)
+
+    def create_config_file(self, configFilePath):
+        # create config parser:
+        config = ConfigParser.ConfigParser(allow_no_value=True)
+        # general settings
+        config.add_section('GENERAL')
+        config.set('GENERAL', 'log_file_path', '')
+        config.set('GENERAL', 'username', '')
+        config.set('GENERAL', 'num_jobs_to_list', '10')
+        config.set('GENERAL', 'num_days_history', '2')
+
+        # Writing our configuration file to
+        with open(configFilePath, 'w') as configfile:
+            config.write(configfile)
+
+    def load_config_file(self, configFilePath):
+        # create config parser:
+        config = ConfigParser.ConfigParser(allow_no_value=True)
+        # load config file
+        config.read(configFilePath)
+
+        # general section
+        self.log_file_path = config.get('GENERAL', 'log_file_path')
+        self.user_name = config.get('GENERAL', 'username')
+        self.num_jobs_to_list = config.getint('GENERAL', 'num_jobs_to_list')
+        self.num_days_history = config.getint('GENERAL', 'num_days_history')
 
     def runCommand(self, cmd):
         command = cmd.split(' ')
@@ -53,30 +99,13 @@ class ClusterRunMonitor:
         out, err = p.communicate()
         return out, err
 
-    def getRunningJobNames(self):
-        '''Gets the current running job names
-        Runs the following command:
-            squeue -u rwaasdorp -o %j -h'''
-
-        # run system command
-        out, err = self.runCommand("squeue -u rwaasdorp -o %j -h")
-
-        # split output in list (without newline char...)
-        if out:
-            # decode out and plit
-            out = out.decode("utf-8").split('\n')
-            # remove empty lists
-            out = [x for x in out if x]
-            return out
-        elif err:
-            print(err)
-        else:
-            return None
-
-    def getJobInfo(self, numDays=2):
+    def getJobInfo(self, numDays=None):
         '''Gets finished  job names
         Runs the following command:
-            sacct -u rwaasdorp --format="jobname,elapsed,state,start,end" -n -X -P'''
+            sacct -u <username> --format="JobID,jobname,elapsed,state,start,end" -n -X -P'''
+
+        if not numDays:
+            numDays = self.num_days_history
 
         # get start time for slurm
         startTime = datetime.now() - timedelta(days=numDays)
@@ -84,7 +113,7 @@ class ClusterRunMonitor:
 
         # run system command
         out, err = self.runCommand(
-            "sacct -u rwaasdorp --format=JobName,elapsed,state,start,end -n -X -P -S " + st_str)
+            "sacct -u " + self.user_name + " --format=JobID,JobName,elapsed,state,start,end -n -X -P -S " + st_str)
 
         # split output in list (without newline char...)
         if out:
@@ -202,7 +231,7 @@ class ClusterRunMonitor:
             return
 
     def lookupFileAndShow(self, jobName):
-        basePath = '/home/rwaasdorp/EMech_waves/mechanical_model/model/log/mega_batch'
+        basePath = self.log_file_path
         # select right files
         files = [f for f in os.listdir(basePath) if os.path.isfile(
             os.path.join(basePath, f)) and jobName in f]
@@ -235,6 +264,32 @@ class ClusterRunMonitor:
                 print(err)
             return
 
+    def getRunningJobNames(self):
+        '''Gets the current running job names
+        Runs the following command:
+            squeue -u <username> -o %j -h'''
+
+        # run system command
+        out, err = self.runCommand("squeue -u " + self.user_name + " -o %j -h")
+
+        # split output in list (without newline char...)
+        if out:
+                # decode out and split
+            out = out.decode("utf-8").split('\n')
+            # remove empty lists
+            out = [x for x in out if x]
+            return out
+        elif err:
+            print(err)
+        else:
+            return None
+
 
 if __name__ == '__main__':
+    # cd to file dir
+    abspath = os.path.abspath(__file__)
+    dname = os.path.dirname(abspath)
+    os.chdir(dname)
+
+    # run the monitor
     crm = ClusterRunMonitor()
