@@ -166,3 +166,4 @@ It is recommended to have some other script create the `runFiles` and handle
 
 ## Future functionality
 - [ ] Cancel job using `crm -j <shortjobnum> --cancel`
+- [ ] Add scripts to create many, many batch jobs (upon request)
