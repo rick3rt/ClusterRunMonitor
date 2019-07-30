@@ -1,6 +1,6 @@
 # ClusterRunMonitor
 
-Small python application that can be used to monitor jobs running on the cluster. 
+Small python application that can be used to monitor jobs running on the cluster. Tested using python 2.6.6, no non built-in modules needed.
 
 Especially usefull when running many batch jobs, and their log files are stored in one folder (see section [Batch script structure](#batch-script-and-folder-structure))
 
@@ -11,16 +11,16 @@ $ crm -l
 |-----------------------------------------------------------------------------------------------------|
 |   JobNum    | JobID     | JobName    | Duration    | State        | Start          | End            |
 |-----------------------------------------------------------------------------------------------------|
-|   10        | 150143    | M261       | 00:05:40    | COMPLETED    | 07-28 07:34    | 07-28 07:40    |
-|   9         | 150144    | M265       | 00:03:32    | COMPLETED    | 07-28 07:40    | 07-28 07:43    |
-|   8         | 150145    | M269       | 00:05:55    | COMPLETED    | 07-28 07:43    | 07-28 07:49    |
-|   7         | 150146    | M273       | 00:36:15    | COMPLETED    | 07-28 07:49    | 07-28 08:25    |
-|   6         | 150147    | M278       | 00:03:13    | COMPLETED    | 07-28 08:04    | 07-28 08:08    |
-|   5         | 150148    | M282       | 00:03:59    | COMPLETED    | 07-28 08:08    | 07-28 08:12    |
-|   4         | 150149    | M286       | 00:30:48    | COMPLETED    | 07-28 08:12    | 07-28 08:42    |
-|   3         | 150150    | M277       | 00:03:14    | COMPLETED    | 07-28 08:25    | 07-28 08:29    |
-|   2         | 150151    | M281       | 00:03:55    | COMPLETED    | 07-28 08:29    | 07-28 08:33    |
-|   1         | 150152    | M285       | 00:30:49    | COMPLETED    | 07-28 08:33    | 07-28 09:03    |
+|   10        | 150143    | JOB_001    | 00:05:40    | COMPLETED    | 07-28 07:34    | 07-28 07:40    |
+|   9         | 150144    | JOB_002    | 00:03:32    | COMPLETED    | 07-28 07:40    | 07-28 07:43    |
+|   8         | 150145    | JOB_003    | 00:05:55    | COMPLETED    | 07-28 07:43    | 07-28 07:49    |
+|   7         | 150146    | JOB_004    | 00:36:15    | COMPLETED    | 07-28 07:49    | 07-28 08:25    |
+|   6         | 150147    | JOB_005    | 00:03:13    | COMPLETED    | 07-28 08:04    | 07-28 08:08    |
+|   5         | 150148    | JOB_006    | 00:03:59    | COMPLETED    | 07-28 08:08    | 07-28 08:12    |
+|   4         | 150149    | JOB_007    | 00:30:48    | COMPLETED    | 07-28 08:12    | 07-28 08:42    |
+|   3         | 150150    | JOB_008    | 00:03:14    | COMPLETED    | 07-28 08:25    | 07-28 08:29    |
+|   2         | 150151    | JOB_009    | 00:03:55    | COMPLETED    | 07-28 08:29    | 07-28 08:33    |
+|   1         | 150152    | JOB_010    | 00:30:49    | COMPLETED    | 07-28 08:33    | 07-28 09:03    |
 |-----------------------------------------------------------------------------------------------------|
 ```
 
@@ -30,7 +30,7 @@ $ crm -j 1 -o
 |-----------------------------------------------------------------------------------------------------|
 |   JobNum    | JobID     | JobName    | Duration    | State        | Start          | End            |
 |-----------------------------------------------------------------------------------------------------|
-|   1         | 150152    | M285       | 00:30:49    | COMPLETED    | 07-28 08:33    | 07-28 09:03    |
+|   1         | 150152    | JOB_010    | 00:30:49    | COMPLETED    | 07-28 08:33    | 07-28 09:03    |
 |-----------------------------------------------------------------------------------------------------|
 
 Starting MATLAB job:
@@ -49,7 +49,7 @@ $ crm -j 1 -e
 |-----------------------------------------------------------------------------------------------------|
 |   JobNum    | JobID     | JobName    | Duration    | State        | Start          | End            |
 |-----------------------------------------------------------------------------------------------------|
-|   1         | 150152    | M285       | 00:30:49    | COMPLETED    | 07-28 08:33    | 07-28 09:03    |
+|   1         | 150152    | JOB_010    | 00:30:49    | COMPLETED    | 07-28 08:33    | 07-28 09:03    |
 |-----------------------------------------------------------------------------------------------------|
 
 <contents of error file>
@@ -73,7 +73,7 @@ optional arguments:
   -c, --cat           cat or tail? Default: cat, add argument to tail
 ```
 
-## Usage
+## Setup
 Clone the repository to any directory. For easy use create an alias in your `.bashrc`, for example:
 ```
 alias crm='python <path_to_ClusterRunMonitor>/clusterRunMonitor.py'
@@ -96,3 +96,60 @@ num_days_history = 2
 
 
 ## Batch script and folder structure
+To use the functions to show the `output` and `error` log files, a certain file and folder structure is required. This looks like: 
+```
+projectRoot
+│
+│   SimulationToRun.m
+│
+└───batch_scripts
+│   │   runFile001.sh
+│   │   runFile002.sh
+│   └   ...
+│
+└───log
+│   │   JOB_001_err
+│   │   JOB_001_out
+│   │   JOB_002_err
+│   │   JOB_002_out
+│   └   ...
+│   
+└───data
+    │   results_JOB_001.mat
+    │   results_JOB_002.mat
+    └   ...
+```
+
+The batch script to start a job, `runFile001.sh`, looks like:
+```
+#!/bin/bash -login
+
+#SBATCH --job-name=JOB_001
+
+## set outputfile name
+#SBATCH -o log/JOB_001_out
+
+## set errorfile name
+#SBATCH -e log/JOB_001_err
+
+## JOB TO RUN, e.g. MATLAB
+module load matlab/2018b
+matlab -nodesktop -nosplash -r "SimulationToRun(1, 'DataFolder', 'data')"
+
+## OPTIONAL: Next job to run
+sbatch batch_scripts/runFile002.sh
+```
+Last line is optional, can be used to start the next job when this job is finished (i.e. not overloading the cluster with xxx jobs at the same time). Important:
+* Each `job-name` should be unique (i.e. contain an identifier, e.g. '`JOB`', and a number), to reference the `out` and `error` files. 
+* `outputfile` name should have the pattern `<job-name>_out`
+* `errorfile` name should have the pattern `<job-name>_err`
+
+
+
+To start the first job, open a terminal in the `projectRoot`, and run
+```
+sbatch batch_scripts/runFile001.sh
+```
+This will make sure that the working directory of the bash script is the `projectRoot`, and the log files will be written to the appropriate location. If the `log` folder does not exist yet, the job will immediately fail. 
+
+It is recommended to have some other script create the `runFiles` and handle 
