@@ -1,5 +1,7 @@
 # do not include ini
 *.ini
+# not include vscode settings
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

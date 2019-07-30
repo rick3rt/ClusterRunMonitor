@@ -1,7 +1,17 @@
 # ClusterRunMonitor
 
-Small python application that can be used to monitor jobs running on the cluster. Tested using python 2.6.6, no non built-in modules needed.
+<!-- TOC -->
 
+- [ClusterRunMonitor](#clusterrunmonitor)
+    - [Features](#features)
+    - [Setup](#setup)
+        - [Configuring the monitor](#configuring-the-monitor)
+    - [Batch script and folder structure](#batch-script-and-folder-structure)
+    - [Future functionality](#future-functionality)
+
+<!-- /TOC -->
+
+Small python application that can be used to monitor jobs running on the cluster. Tested using python 2.6.6, only built-in modules needed.
 Especially usefull when running many batch jobs, and their log files are stored in one folder (see section [Batch script structure](#batch-script-and-folder-structure))
 
 ## Features
@@ -153,3 +163,6 @@ sbatch batch_scripts/runFile001.sh
 This will make sure that the working directory of the bash script is the `projectRoot`, and the log files will be written to the appropriate location. If the `log` folder does not exist yet, the job will immediately fail. 
 
 It is recommended to have some other script create the `runFiles` and handle 
+
+## Future functionality
+- [ ] Cancel job using `crm -j <shortjobnum> --cancel`
