@@ -214,22 +214,25 @@ class ClusterRunMonitor:
 
     def showJob(self):
         # get job info
-        _, info = self.getJobInfo()
+        _, info = self.getJobInfo(self.args.numdays)
         # number them
-        info = self.numberJobs(info)
+        if info:
+            info = self.numberJobs(info)
 
-        # select correct job
-        for job in info:
-            if job[0] == self.args.jobNum:
-                jobinfo = job
+            # select correct job
+            for job in info:
+                if job[0] == self.args.jobNum:
+                    jobinfo = job
 
-        # what to do with the job
-        jobName = jobinfo[2]
-        self.printInfo([jobinfo])
-        # cat ouput file
-        if self.args.output or self.args.error:
-            self.lookupFileAndShow(jobName)
-            return
+            # what to do with the job
+            jobName = jobinfo[2]
+            self.printInfo([jobinfo])
+            # cat ouput file
+            if self.args.output or self.args.error:
+                self.lookupFileAndShow(jobName)
+                return
+        else:
+            print('No Jobs found (for given number of days, try option: -D numdays)')
 
     def lookupFileAndShow(self, jobName):
         basePath = self.log_file_path
