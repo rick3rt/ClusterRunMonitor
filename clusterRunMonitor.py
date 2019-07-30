@@ -128,7 +128,7 @@ class ClusterRunMonitor:
             for i in range(len(out2)):
                 # 0JobName,1elapsed,2state,3start,4end
                 jobNames.append(out2[i][0])
-                for k in [3, 4]:
+                for k in [4, 5]:
                     if 'Unknown' not in out2[i][k]:
                         # convert to datetime
                         dt = datetime.strptime(out2[i][k], '%Y-%m-%dT%H:%M:%S')
@@ -159,9 +159,9 @@ class ClusterRunMonitor:
     def printInfo(self, jobInfo, numJobs=10, numbered=True):
         # print in pretty format
         if numbered:
-            header = ['JobNum', 'JobName', 'Duration', 'State', 'Start', 'End']
+            header = ['JobNum', 'JobName', 'Duration', 'State', 'Start', 'End', 'JobID']
         else:
-            header = ['JobName', 'Duration', 'State', 'Start', 'End']
+            header = ['JobName', 'Duration', 'State', 'Start', 'End', 'JobID']
 
         # select last 10 jobs or max
         numJobs = min(len(jobInfo), numJobs)
