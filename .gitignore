@@ -1,5 +1,7 @@
 # do not include ini
 *.ini
+*.ini.backup
+
 # not include vscode settings
 .vscode
 

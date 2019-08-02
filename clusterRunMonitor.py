@@ -5,6 +5,7 @@ import argparse
 import ConfigParser
 import subprocess
 import os
+from shutil import copyfile
 from datetime import datetime, timedelta
 import copy
 
@@ -17,7 +18,20 @@ class ClusterRunMonitor:
         self.input_arg_parser()
 
         # act based on args
-        if self.args.list:
+        if self.args.set:
+            self.set_setting(self.args.set[0], self.args.set[1])
+            return
+
+        elif self.args.get:
+            # print(self.args.get)
+            self.get_setting(self.args.get[0])
+            return
+
+        elif self.args.reset:
+            self.reset_backup_settings()
+            return
+
+        elif self.args.list:
             self.listJobs()
             return
 
@@ -46,6 +60,14 @@ class ClusterRunMonitor:
         parser.add_argument(
             '-c', '--cat', help='cat or tail? Default: cat, add argument to tail', action="store_true")
 
+        # set and get
+        parser.add_argument('--set', help='Set a setting in the ini',
+                            type=str, nargs=2, metavar=('toSet', 'valToSet'))
+        parser.add_argument('--get', help='Get (view) a setting from the ini. use \'--get all\' to list all settings',
+                            type=str, nargs=1, metavar='toGet')
+        parser.add_argument('--reset', help='Reset settings backup file, if exists.',
+                            action="store_true")
+
         self.args = parser.parse_args()
 
     def load_settings(self):
@@ -53,6 +75,7 @@ class ClusterRunMonitor:
         configFileName = 'crm_config.ini'
         filePath = os.path.dirname(os.path.realpath(__file__))
         configFilePath = os.path.join(filePath, configFileName)
+        self.configFilePath = configFilePath
         # check if exists
         if os.path.isfile(configFilePath):
             self.load_config_file(configFilePath)
@@ -76,6 +99,20 @@ class ClusterRunMonitor:
         with open(configFilePath, 'w') as configfile:
             config.write(configfile)
 
+    def update_config_file(self, configFilePath, toSet, valToSet):
+        # backup config
+        copyfile(configFilePath, configFilePath + '.backup')
+
+        # create config parser:
+        config = ConfigParser.ConfigParser(allow_no_value=True)
+        # load config file
+        config.read(configFilePath)
+        # general settings
+        config.set('GENERAL', toSet, valToSet)
+        # Writing our configuration file to
+        with open(configFilePath, 'w') as configfile:
+            config.write(configfile)
+
     def load_config_file(self, configFilePath):
         # create config parser:
         config = ConfigParser.ConfigParser(allow_no_value=True)
@@ -87,6 +124,41 @@ class ClusterRunMonitor:
         self.user_name = config.get('GENERAL', 'username')
         self.num_jobs_to_list = config.getint('GENERAL', 'num_jobs_to_list')
         self.num_days_history = config.getint('GENERAL', 'num_days_history')
+
+        # write settings names for reference
+        self.setting_names = ['log_file_path', 'username', 'num_jobs_to_list', 'num_days_history']
+
+    def get_setting(self, toGet):
+        if toGet == 'log_file_path':
+            print('{}:\t{}'.format(toGet, self.log_file_path))
+        elif toGet == 'username':
+            print('{}:\t{}'.format(toGet, self.user_name))
+        elif toGet == 'num_jobs_to_list':
+            print('{}:\t{}'.format(toGet, self.num_jobs_to_list))
+        elif toGet == 'num_days_history':
+            print('{}:\t{}'.format(toGet, self.num_days_history))
+        elif toGet == 'all' or toGet == '?':
+            print('{}:\t{}'.format('log_file_path', self.log_file_path))
+            print('{}:\t{}'.format('username', self.user_name))
+            print('{}:\t{}'.format('num_jobs_to_list', self.num_jobs_to_list))
+            print('{}:\t{}'.format('num_days_history', self.num_days_history))
+        else:
+            print('Unkown setting: {}'.format(toGet))
+
+    def set_setting(self, toSet, valToSet):
+        # check if valid setting
+        if toSet in self.setting_names:
+            self.update_config_file(self.configFilePath, toSet, valToSet)
+            print('Updated settings')
+            print('{}:\t{}'.format(toSet, valToSet))
+
+    def reset_backup_settings(self):
+        # check if backup file exists
+        if os.path.isfile(self.configFilePath + '.backup'):
+            copyfile(self.configFilePath + '.backup', self.configFilePath)
+            print('Reverted to backup settings.')
+        else:
+            print('No backup found.')
 
     def runCommand(self, cmd):
         command = cmd.split(' ')
