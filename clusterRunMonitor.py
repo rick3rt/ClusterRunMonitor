@@ -130,27 +130,27 @@ class ClusterRunMonitor:
 
     def get_setting(self, toGet):
         if toGet == 'log_file_path':
-            print('{}:\t{}'.format(toGet, self.log_file_path))
+            print('{0}:\t{1}'.format(toGet, self.log_file_path))
         elif toGet == 'username':
-            print('{}:\t{}'.format(toGet, self.user_name))
+            print('{0}:\t{1}'.format(toGet, self.user_name))
         elif toGet == 'num_jobs_to_list':
-            print('{}:\t{}'.format(toGet, self.num_jobs_to_list))
+            print('{0}:\t{1}'.format(toGet, self.num_jobs_to_list))
         elif toGet == 'num_days_history':
-            print('{}:\t{}'.format(toGet, self.num_days_history))
+            print('{0}:\t{1}'.format(toGet, self.num_days_history))
         elif toGet == 'all' or toGet == '?':
-            print('{}:\t{}'.format('log_file_path', self.log_file_path))
-            print('{}:\t{}'.format('username', self.user_name))
-            print('{}:\t{}'.format('num_jobs_to_list', self.num_jobs_to_list))
-            print('{}:\t{}'.format('num_days_history', self.num_days_history))
+            print('{0}:\t{1}'.format('log_file_path', self.log_file_path))
+            print('{0}:\t{1}'.format('username', self.user_name))
+            print('{0}:\t{1}'.format('num_jobs_to_list', self.num_jobs_to_list))
+            print('{0}:\t{1}'.format('num_days_history', self.num_days_history))
         else:
-            print('Unkown setting: {}'.format(toGet))
+            print('Unkown setting: {0}'.format(toGet))
 
     def set_setting(self, toSet, valToSet):
         # check if valid setting
         if toSet in self.setting_names:
             self.update_config_file(self.configFilePath, toSet, valToSet)
             print('Updated settings')
-            print('{}:\t{}'.format(toSet, valToSet))
+            print('{0}:\t{1}'.format(toSet, valToSet))
 
     def reset_backup_settings(self):
         # check if backup file exists
