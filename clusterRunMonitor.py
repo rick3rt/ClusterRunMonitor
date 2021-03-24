@@ -50,16 +50,14 @@ class ClusterRunMonitor:
             description='List running slurm jobs, and monitor them.')
 
         parser.add_argument('-l', '--list', help='List running jobs', action="store_true")
-        parser.add_argument(
-            '-j', '--jobNum', help='Select job number (not slurm reference, but see --list)', type=int, metavar='jn')
+        parser.add_argument('-j', '--jobNum', help='Select job number (not slurm reference, but see --list)', type=int, metavar='jn')
         parser.add_argument('-o', '--output', help='Show output log for a job', action="store_true")
         parser.add_argument('-e', '--error', help='Show error log for a job', action="store_true")
         parser.add_argument('-N', '--num', help='Set number of jobs to list',
                             type=int, default=self.num_jobs_to_list, metavar='n')
         parser.add_argument('-D', '--numdays', help='Set number of days to include in job history',
                             type=int, default=self.num_days_history, metavar='d')
-        parser.add_argument(
-            '-c', '--cat', help='cat or tail? Default: cat, add argument to tail', action="store_true")
+        parser.add_argument('-c', '--cat', help='cat or tail? Default: cat, add argument to tail', action="store_true")
 
         # set and get
         parser.add_argument('--set', help='Set a setting in the ini',
@@ -184,7 +182,7 @@ class ClusterRunMonitor:
 
         # run system command
         out, err = self.runCommand(
-            "sacct -u " + self.user_name + " --format=JobID,JobName,elapsed,state,start,end -n -X -P -S " + st_str)
+            "sacct -u " + self.user_name + " --format=JobID,JobName,elapsed,state,start -n -X -P -S " + st_str)
 
         # split output in list (without newline char...)
         if out:
@@ -200,7 +198,7 @@ class ClusterRunMonitor:
             for i in range(len(jobInfo)):
                 # 0JobName,1elapsed,2state,3start,4end
                 jobNames.append(jobInfo[i][0])
-                for k in [4, 5]:
+                for k in [4]:
                     if 'Unknown' not in jobInfo[i][k]:
                         # convert to datetime
                         dt = datetime.strptime(jobInfo[i][k], '%Y-%m-%dT%H:%M:%S')
@@ -231,9 +229,9 @@ class ClusterRunMonitor:
     def printInfo(self, jobInfo, numJobs=10, numbered=True):
         # print in pretty format
         if numbered:
-            header = ['JobNum', 'JobID', 'JobName', 'Duration', 'State', 'Start', 'End']
+            header = ['jn', 'JobID', 'JobName', 'Duration', 'State', 'Start']
         else:
-            header = ['JobID', 'JobName', 'Duration', 'State', 'Start', 'End']
+            header = ['JobID', 'JobName', 'Duration', 'State', 'Start']
 
         # select last 10 jobs or max
         numJobs = min(len(jobInfo), numJobs)
