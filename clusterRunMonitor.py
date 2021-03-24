@@ -312,6 +312,7 @@ class ClusterRunMonitor:
         # select right files
         files = [f for f in os.listdir(basePath) if os.path.isfile(
             os.path.join(basePath, f)) and jobName in f]
+        print(files)
 
         # set how to display file
         if self.args.cat:
