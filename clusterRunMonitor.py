@@ -318,10 +318,8 @@ class ClusterRunMonitor:
             for f in files:
                 if jobNum in f:
                     newfiles.append(f)
-        if len(newfiles) > 1:
+        if len(newfiles) >= 1:
             files = newfiles
-        print(files)
-        print(newfiles)
             
         # set how to display file
         if self.args.cat:
