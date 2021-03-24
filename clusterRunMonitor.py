@@ -299,21 +299,28 @@ class ClusterRunMonitor:
 
             # what to do with the job
             jobName = jobinfo[2]
+            jobNum = jobinfo[1]
             self.printInfo([jobinfo])
             # cat ouput file
             if self.args.output or self.args.error:
-                self.lookupFileAndShow(jobName)
+                self.lookupFileAndShow(jobName, jobNum)
                 return
         else:
             print('No Jobs found (for given number of days, try option: -D numdays)')
 
-    def lookupFileAndShow(self, jobName):
+    def lookupFileAndShow(self, jobName, jobNum):
         basePath = self.log_file_path
         # select right files
         files = [f for f in os.listdir(basePath) if os.path.isfile(
             os.path.join(basePath, f)) and jobName in f]
-        print(files)
-
+        newfiles = []
+        if len(files) > 1:
+            for f in files:
+                if jobNum in f:
+                    newfiles.append(f)
+        if len(newfiles) > 1:
+            files = newfiles
+            
         # set how to display file
         if self.args.cat:
             # set show command to tail
