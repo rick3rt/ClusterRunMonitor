@@ -320,6 +320,8 @@ class ClusterRunMonitor:
                     newfiles.append(f)
         if len(newfiles) > 1:
             files = newfiles
+        print(files)
+        print(newfiles)
             
         # set how to display file
         if self.args.cat:
