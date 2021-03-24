@@ -252,7 +252,7 @@ class ClusterRunMonitor:
             print '|--' + (sum(spacing) + len(spacing) * 6 - 1) * '-' + '|'
             print '|  ',
             for i, elem in enumerate(header):
-                e = str(elem) + (spacing[i] - len(str(elem)) + 3) * ' '
+                e = str(elem) + (spacing[i] - len(str(elem))) * ' '
                 print e, '|',
             print
             print '|--' + (sum(spacing) + len(spacing) * 6 - 1) * '-' + '|'
@@ -261,7 +261,7 @@ class ClusterRunMonitor:
         for row in data:
             print '|  ',
             for i, elem in enumerate(row):
-                e = str(elem) + (spacing[i] - len(str(elem)) + 3) * ' '
+                e = str(elem) + (spacing[i] - len(str(elem))) * ' '
                 print e, '|',
             print
 
