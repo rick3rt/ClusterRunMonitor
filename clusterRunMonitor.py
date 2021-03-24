@@ -11,8 +11,9 @@ import copy
 
 
 class ClusterRunMonitor:
-    def __init__(self):
-        # load user settings
+    def __init__(self, filedir):
+        self.filedir = filedir
+	# load user settings
         self.load_settings()
         # parse input arguments
         self.input_arg_parser()
@@ -125,6 +126,8 @@ class ClusterRunMonitor:
         self.num_jobs_to_list = config.getint('GENERAL', 'num_jobs_to_list')
         self.num_days_history = config.getint('GENERAL', 'num_days_history')
 
+	self.log_file_path = os.path.join(os.getcwd(), self.log_file_path)
+	
         # write settings names for reference
         self.setting_names = ['log_file_path', 'username', 'num_jobs_to_list', 'num_days_history']
 
@@ -365,7 +368,7 @@ if __name__ == '__main__':
     # cd to file dir
     abspath = os.path.abspath(__file__)
     dname = os.path.dirname(abspath)
-    os.chdir(dname)
+    # os.chdir(dname)
 
     # run the monitor
-    crm = ClusterRunMonitor()
+    crm = ClusterRunMonitor(dname)
