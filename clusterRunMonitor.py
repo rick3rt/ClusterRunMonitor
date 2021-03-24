@@ -249,24 +249,24 @@ class ClusterRunMonitor:
 
         # print header
         if header:
-            print '|--' + (sum(spacing) + len(spacing) * 6 - 1) * '-' + '|'
-            print '|  ',
+            print '|-' + (sum(spacing) + len(spacing) * 3 - 1) * '-' + '|'
+            print '| ',
             for i, elem in enumerate(header):
                 e = str(elem) + (spacing[i] - len(str(elem))) * ' '
                 print e, '|',
             print
-            print '|--' + (sum(spacing) + len(spacing) * 6 - 1) * '-' + '|'
+            print '|-' + (sum(spacing) + len(spacing) * 3 - 1) * '-' + '|'
 
         # print data
         for row in data:
-            print '|  ',
+            print '| ',
             for i, elem in enumerate(row):
                 e = str(elem) + (spacing[i] - len(str(elem))) * ' '
                 print e, '|',
             print
 
         # close it
-        print '|--' + (sum(spacing) + len(spacing) * 6 - 1) * '-' + '|'
+        print '|-' + (sum(spacing) + len(spacing) * 3 - 1) * '-' + '|'
 
     def numberJobs(self, jobInfo):
         # make deepcopy because i dont want to think about references at the moment
