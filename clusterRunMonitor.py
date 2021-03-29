@@ -301,9 +301,10 @@ class ClusterRunMonitor:
             # what to do with the job
             jobName = jobinfo[2]
             jobNum = jobinfo[1]
-            self.printInfo([jobinfo])
+            if not self.args.fname:
+                self.printInfo([jobinfo])
             # cat ouput file
-            if self.args.output or self.args.error:
+            if self.args.output or self.args.error or self.args.fname:
                 self.lookupFileAndShow(jobName, jobNum)
                 return
         else:
