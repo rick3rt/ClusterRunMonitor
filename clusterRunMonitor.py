@@ -58,6 +58,7 @@ class ClusterRunMonitor:
         parser.add_argument('-D', '--numdays', help='Set number of days to include in job history',
                             type=int, default=self.num_days_history, metavar='d')
         parser.add_argument('-c', '--cat', help='cat or tail? Default: cat, add argument to tail', action="store_true")
+        parser.add_argument('-f', '--fname', help='get filename', action="store_true")
 
         # set and get
         parser.add_argument('--set', help='Set a setting in the ini',
@@ -328,6 +329,12 @@ class ClusterRunMonitor:
         else:
             # set show command to cat
             showCommand = 'cat'
+
+        if self.args.fname:
+            file = [x for x in files if 'out' in x][0]
+            filePath = os.path.join(basePath, file)
+            print(filePath)
+            return 
 
         if self.args.output:
             file = [x for x in files if 'out' in x][0]
